@@ -1,0 +1,8 @@
+# roles/nginx/defaults/main.yml
+---
+nginx_package: nginx
+nginx_service: nginx
+nginx_user: www-data
+nginx_restart_on_change: true  # Перезапускать ли Nginx при изменении конфигурации
+nginx_worker_connections: 1024
+nginx_keepalive_timeout: 65

@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s  # Интервал сбора метрик
+
+scrape_configs:
+  - job_name: "remote_target"  # Удалённый таргет
+    scheme: "http"
+    static_configs:
+      - targets: ["47.84.45.125:80"]  # Адрес вашего удалённого сервиса
+
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:8428']
+
+  - job_name: "node_exporter"  # Удалённый таргет
+    scheme: "http"
+    static_configs:
+      - targets: ["47.84.45.125:9100"]  # Адрес вашего удалённого сервиса  
+
+  - job_name: "New_Target"  # Удалённый таргет
+    scheme: "http"
+    static_configs:
+      - targets: ["47.84.45.125:8081"]  # Адрес вашего удалённого сервиса  

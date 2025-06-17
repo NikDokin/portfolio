@@ -1,0 +1,27 @@
+---
+# Версия Docker Compose
+docker_compose_version: "v2.23.0"
+
+# Архитектура системы (автоматически определяется через ansible_architecture)
+docker_compose_arch: "{{ ansible_architecture }}"
+
+# Репозиторий Docker (для разных дистрибутивов)
+docker_repo:
+  Debian: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+  RedHat: "https://download.docker.com/linux/centos/docker-ce.repo"
+
+# Пакеты для установки Docker
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+
+# Пользователь, который будет добавлен в группу docker
+docker_user: "{{ ansible_user }}"
+
+# Дополнительные зависимости
+docker_dependencies:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent

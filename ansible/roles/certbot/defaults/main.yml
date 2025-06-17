@@ -1,0 +1,5 @@
+# roles/certbot/vars/main.yml
+certbot_nginx_configs:
+  - jenkins
+  - vm
+  - grafana

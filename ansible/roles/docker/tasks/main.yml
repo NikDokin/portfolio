@@ -1,0 +1,62 @@
+# roles/docker/tasks/main.yml
+---
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: "{{ docker_dependencies }}"
+    state: present
+  tags: deps
+
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  tags: repo
+
+- name: Add Docker repository (Ubuntu)
+  ansible.builtin.apt_repository:
+    repo: "{{ docker_repo['Debian'] }}"
+    state: present
+  when: ansible_os_family == 'Debian'
+  tags: repo
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: true
+  tags: docker_engine
+
+- name: Start and enable Docker service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+  tags: service
+
+- name: Install docker-compose
+  ansible.builtin.get_url:
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-linux-{{ docker_compose_arch }}"
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+    owner: root
+    group: root
+  tags: docker_compose
+
+- name: Add current user to docker group
+  ansible.builtin.user:
+    name: "{{ docker_user }}"
+    groups: docker
+    append: true
+  tags: user_group
+
+- name: Check if user is in docker group
+  ansible.builtin.shell: id -nG | grep -q '\bdocker\b'
+  register: user_in_docker_group
+  ignore_errors: true
+  changed_when: false
+
+- name: Notify about group change
+  ansible.builtin.debug:
+    msg: "Пользователь {{ ansible_user }} добавлен в группу docker. Перезайдите в систему или выполните 'newgrp docker'."
+  when: user_in_docker_group.rc != 0
+  tags: user_group

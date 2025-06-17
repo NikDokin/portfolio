@@ -1,0 +1,84 @@
+---
+- name: Установка и настройка vmagent
+  hosts: all  # Укажите целевую группу хостов из inventory
+  become: true  # Выполнение задач с правами root
+  vars:
+    vmagent_version: "1.93.4"  # Версия vmagent
+    vmagent_install_dir: "/opt/vmagent"  # Директория для установки
+    vmagent_user: "vmagent"  # Пользователь для запуска vmagent
+    remote_write_url: "https://vm.testshift.webtm.ru/api/v1/write"  # URL VictoriaMetrics
+
+  tasks:
+    - name: Создание пользователя vmagent
+      ansible.builtin.user:
+        name: "{{ vmagent_user }}"
+        system: true
+        shell: /bin/false
+        create_home: false
+
+    - name: Создание директории для установки
+      ansible.builtin.file:
+        path: "{{ vmagent_install_dir }}"
+        state: directory
+        owner: "{{ vmagent_user }}"
+        group: "{{ vmagent_user }}"
+        mode: '0755'
+
+    - name: Скачивание vmagent
+      ansible.builtin.get_url:
+        url: "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v{{ vmagent_version }}/vmutils-linux-amd64-v{{ vmagent_version }}.tar.gz"
+        dest: "/tmp/vmutils-linux-amd64-v{{ vmagent_version }}.tar.gz"
+        mode: '0644'
+
+    - name: Распаковка архива
+      ansible.builtin.unarchive:
+        src: "/tmp/vmutils-linux-amd64-v{{ vmagent_version }}.tar.gz"
+        dest: "{{ vmagent_install_dir }}"
+        remote_src: true
+        owner: "{{ vmagent_user }}"
+        group: "{{ vmagent_user }}"
+        mode: '0755'
+
+    - name: Переименование vmagent-prod в vmagent
+      ansible.builtin.file:
+        src: "{{ vmagent_install_dir }}/vmagent-prod"
+        dest: "{{ vmagent_install_dir }}/vmagent"
+        state: link
+        owner: "{{ vmagent_user }}"
+        group: "{{ vmagent_user }}"
+        mode: '0755'
+
+    - name: Создание systemd-службы для vmagent
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/vmagent.service
+        content: |
+          [Unit]
+          Description=vmagent
+          After=network.target
+
+          [Service]
+          User={{ vmagent_user }}
+          ExecStart={{ vmagent_install_dir }}/vmagent -remoteWrite.url={{ remote_write_url }}
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Перезагрузка systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Запуск и включение службы vmagent
+      ansible.builtin.systemd:
+        name: vmagent
+        state: started
+        enabled: true
+
+    - name: Удаление временного архива
+      ansible.builtin.file:
+        path: "/tmp/vmutils-linux-amd64-v{{ vmagent_version }}.tar.gz"
+        state: absent

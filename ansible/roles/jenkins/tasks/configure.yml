@@ -1,0 +1,8 @@
+# roles/jenkins/tasks/configure.yml
+---
+- name: Allow firewall access for Jenkins
+  community.general.ufw:
+    rule: allow
+    port: "{{ jenkins_port }}"
+    proto: tcp
+  tags: configure

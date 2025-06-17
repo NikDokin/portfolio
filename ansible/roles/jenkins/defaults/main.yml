@@ -1,0 +1,6 @@
+# roles/jenkins/defaults/main.yml
+---
+jenkins_url: "http://147.45.161.95:8080/"
+jenkins_port: 8080
+jenkins_repo_key_url: "https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key"
+jenkins_repo_url: "deb https://pkg.jenkins.io/debian-stable binary/"

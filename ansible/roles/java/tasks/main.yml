@@ -1,0 +1,5 @@
+- name: Install Java
+  ansible.builtin.apt:
+    name: "{{ java_package }}"
+    state: present
+  tags: install

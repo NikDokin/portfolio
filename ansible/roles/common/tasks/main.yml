@@ -1,0 +1,13 @@
+# roles/common/tasks/main.yml
+---
+- name: Gather facts
+  ansible.builtin.setup:
+
+- name: Debug ansible_user_groups
+  ansible.builtin.debug:
+    var: ansible_user_groups
+
+- name: Update apt package list
+  ansible.builtin.apt:
+    update_cache: true
+  tags: apt_update

@@ -1,0 +1,19 @@
+# roles/grafana/tasks/service.yml
+---
+- name: Ensure Grafana service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ grafana_service }}"
+    state: started
+    enabled: true
+  tags: service
+
+- name: Check Grafana service status
+  ansible.builtin.command: systemctl status "{{ grafana_service }}"
+  register: grafana_service_status
+  changed_when: false
+  tags: service
+
+- name: Debug Grafana service status
+  ansible.builtin.debug:
+    var: grafana_service_status.stdout_lines
+  tags: service

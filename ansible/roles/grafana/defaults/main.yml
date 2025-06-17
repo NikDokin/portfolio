@@ -1,0 +1,7 @@
+# roles/grafana/defaults/main.yml
+---
+grafana_version: "10.2.0"
+grafana_apt_repo: "deb https://apt.grafana.com stable main"
+grafana_apt_key_url: "https://apt.grafana.com/gpg.key"
+grafana_service: grafana-server
+grafana_port: 3000

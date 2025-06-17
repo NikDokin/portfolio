@@ -1,0 +1,7 @@
+# testplaybook.yml
+---
+- name: all
+  hosts: sudoremont
+  become: true
+  roles:
+    - docker

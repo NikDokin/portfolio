@@ -1,0 +1,10 @@
+[Unit]
+Description=Run script monitoring for test process every minute
+
+[Timer]
+OnBootSec=0
+OnUnitActiveSec=1min
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

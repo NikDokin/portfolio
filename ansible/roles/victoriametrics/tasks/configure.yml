@@ -1,0 +1,19 @@
+# roles/victoriametrics/tasks/configure.yml
+---
+- name: Create config for VictoriaMetrics
+  ansible.builtin.template:
+    src: scrape_config.yml.j2
+    dest: "{{ victoriametrics_install_dir }}/scrape_config.yml"
+    owner: "{{ victoriametrics_user }}"
+    group: "{{ victoriametrics_user }}"
+    mode: '0644'
+  tags: configure
+
+- name: Create systemd service for VictoriaMetrics
+  ansible.builtin.template:
+    src: victoriametrics.service.j2
+    dest: "{{ victoriametrics_service }}"
+    owner: "{{ victoriametrics_user }}"
+    group: "{{ victoriametrics_user }}"
+    mode: '0644'
+  tags: configure

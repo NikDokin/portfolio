@@ -1,0 +1,4 @@
+# roles/jenkins/vars/main.yml
+---
+# Пример переменных, которые не должны переопределяться
+jenkins_home: /var/lib/jenkins

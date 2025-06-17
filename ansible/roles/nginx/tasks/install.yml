@@ -1,0 +1,7 @@
+# roles/nginx/tasks/install.yml
+---
+- name: Install nginx
+  ansible.builtin.apt:
+    name: "{{ nginx_package }}"
+    state: present
+  tags: install

@@ -1,0 +1,4 @@
+# roles/nginx/vars/main.yml
+---
+# Пример переменных, которые не должны переопределяться
+nginx_log_dir: /var/log/nginx

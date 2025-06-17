@@ -1,0 +1,45 @@
+# roles/victoriametrics/tasks/install.yml
+---
+- name: Create user victoriametrics
+  ansible.builtin.user:
+    name: "{{ victoriametrics_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+  tags: install
+
+- name: Create directory for VictoriaMetrics
+  ansible.builtin.file:
+    path: "{{ victoriametrics_install_dir }}"
+    state: directory
+    owner: "{{ victoriametrics_user }}"
+    group: "{{ victoriametrics_user }}"
+    mode: '0755'
+  tags: install
+
+- name: Download VictoriaMetrics
+  ansible.builtin.get_url:
+    url: "{{ victoriametrics_url_tar }}"
+    dest: "{{ victoriametrics_install_dir }}/victoria-metrics.tar.gz"
+    owner: "{{ victoriametrics_user }}"
+    group: "{{ victoriametrics_user }}"
+    validate_certs: true
+    force: true
+    mode: '0755'
+  tags: install
+
+- name: Unpack VictoriaMetrics
+  ansible.builtin.unarchive:
+    src: "{{ victoriametrics_install_dir }}/victoria-metrics.tar.gz"
+    dest: "{{ victoriametrics_install_dir }}/"
+    remote_src: true
+  tags: install
+
+- name: Create directory for data VictoriaMetrics
+  ansible.builtin.file:
+    path: "{{ victoriametrics_data_dir }}"
+    state: directory
+    owner: "{{ victoriametrics_user }}"
+    group: "{{ victoriametrics_user }}"
+    mode: '0755'
+  tags: install

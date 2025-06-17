@@ -1,0 +1,4 @@
+# roles/docker/meta/main.yml
+---
+dependencies:
+  - common

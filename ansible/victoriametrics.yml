@@ -1,0 +1,89 @@
+- name: Install VictoriaMetrics
+  hosts: all
+  become: true
+  vars:
+    victoriametrics_version: "v1.82.0"
+    victoriametrics_install_dir: "/opt/victoriametrics"
+    victoriametrics_data_dir: "/var/lib/victoria-metrics-data"
+    victoriametrics_user: "nobody"
+    victoriametrics_group: "nogroup"
+    retention_period: "1"
+
+  tasks:
+    - name: Install update
+      ansible.builtin.apt:
+        name:
+          - wget
+          - curl
+        state: present
+
+    - name: Create directory for VictoriaMetrics
+      ansible.builtin.file:
+        path: "{{ victoriametrics_install_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Download VictoriaMetrics
+      ansible.builtin.get_url:
+        url: "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victoriametrics_version }}/victoria-metrics-linux-amd64-{{ victoriametrics_version }}.tar.gz"
+        dest: "{{ victoriametrics_install_dir }}/victoria-metrics.tar.gz"
+        validate_certs: true
+        force: true
+        mode: '0755'
+
+    - name: Unpacking VictoriaMetrics
+      ansible.builtin.unarchive:
+        src: "{{ victoriametrics_install_dir }}/victoria-metrics.tar.gz"
+        dest: "{{ victoriametrics_install_dir }}/"
+        remote_src: true
+        extra_opts: [--strip-components=1]
+
+    - name: Create systemd service for VictoriaMetrics
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/victoriametrics.service
+        content: |
+          [Unit]
+          Description=VictoriaMetrics
+          After=network.target
+
+          [Service]
+          Type=simple
+          User={{ victoriametrics_user }}
+          Group={{ victoriametrics_group }}
+          ExecStart={{ victoriametrics_install_dir }}/victoria-metrics-prod -storageDataPath={{ victoriametrics_data_dir }} -retentionPeriod={{ retention_period }}
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create directory for data VictoriaMetrics
+      ansible.builtin.file:
+        path: "{{ victoriametrics_data_dir }}"
+        state: directory
+        owner: "{{ victoriametrics_user }}"
+        group: "{{ victoriametrics_group }}"
+        mode: '0755'
+
+    - name: Reboot systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Launching and enabling the service VictoriaMetrics
+      ansible.builtin.systemd:
+        name: victoriametrics
+        state: started
+        enabled: true
+
+    - name: Checking the service status VictoriaMetrics
+      ansible.builtin.command: systemctl status victoriametrics
+      register: service_status
+      changed_when: false
+
+    - name: Service status output
+      ansible.builtin.debug:
+        var: service_status.stdout_lines

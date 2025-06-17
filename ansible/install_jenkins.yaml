@@ -1,0 +1,53 @@
+---
+- name: Install jenkins
+  hosts: all
+  become: true
+  vars:
+    jenkins_url: http://147.45.161.95:8080/
+  tasks:
+    - name: Update apt package list
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install java
+      ansible.builtin.apt:
+        name:
+          - openjdk-17-jre
+        state: present
+    - name: Add Jenkins repository with GPG key
+      ansible.builtin.apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        state: present
+      register: gpg_key_result
+
+    - name: Add Jenkins repository
+      ansible.builtin.apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        filename: jenkins
+        state: present
+        update_cache: true
+        validate_certs: false
+      register: jenkins_repo_result
+
+    - name: Install jenkins
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+        enabled: true
+
+    - name: Allow firewall access for Jenkins
+      community.general.ufw:
+        rule: allow
+        port: 8080
+        proto: tcp
+
+  handlers:
+    - name: Restart Jenkins
+      ansible.builtin.service:
+        name: jenkins
+        state: restarted

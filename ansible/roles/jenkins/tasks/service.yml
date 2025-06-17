@@ -1,0 +1,14 @@
+# roles/jenkins/tasks/service.yml
+---
+- name: Start Jenkins service
+  ansible.builtin.service:
+    name: jenkins
+    state: started
+    enabled: true
+  tags: service
+
+- name: Restart Jenkins
+  ansible.builtin.service:
+    name: jenkins
+    state: restarted
+  tags: restart

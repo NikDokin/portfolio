@@ -1,0 +1,6 @@
+# roles/victoriametrics/handlers/main.yml
+---
+- name: Restart VictoriaMetrics
+  ansible.builtin.systemd:
+    name: victoriametrics
+    state: restarted

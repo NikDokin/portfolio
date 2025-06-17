@@ -1,0 +1,4 @@
+# roles/nginx/meta/main.yml
+---
+dependencies:
+  - common

@@ -1,0 +1,14 @@
+# roles/nginx/tasks/service.yml
+---
+- name: Ensure nginx is running and enabled on boot
+  ansible.builtin.service:
+    name: "{{ nginx_service }}"
+    state: started
+    enabled: true
+  tags: service
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: "{{ nginx_service }}"
+    state: restarted
+  tags: restart

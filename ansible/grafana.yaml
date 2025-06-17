@@ -1,0 +1,48 @@
+- name: Install Grafana
+  hosts: all
+  become: true
+  vars:
+    grafana_version: "10.2.0"  # Укажите нужную версию Grafana
+    grafana_apt_repo: "deb https://apt.grafana.com stable main"
+    grafana_apt_key_url: "https://apt.grafana.com/gpg.key"
+
+  tasks:
+    - name: Ensure dependencies are installed
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - software-properties-common
+          - wget
+        state: present
+
+    - name: Add Grafana GPG key
+      ansible.builtin.apt_key:
+        url: "{{ grafana_apt_key_url }}"
+        state: present
+
+    - name: Add Grafana APT repository
+      ansible.builtin.apt_repository:
+        repo: "{{ grafana_apt_repo }}"
+        state: present
+        update_cache: true
+
+    - name: Install Grafana
+      ansible.builtin.apt:
+        name: grafana
+        state: present
+        update_cache: true
+
+    - name: Ensure Grafana service is enabled and started
+      ansible.builtin.systemd:
+        name: grafana-server
+        state: started
+        enabled: true
+
+    - name: Check Grafana service status
+      ansible.builtin.command: systemctl status grafana-server
+      register: grafana_service_status
+      changed_when: false
+
+    - name: Debug Grafana service status
+      ansible.builtin.debug:
+        var: grafana_service_status.stdout_lines

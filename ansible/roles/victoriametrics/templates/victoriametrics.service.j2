@@ -1,0 +1,14 @@
+# roles/victoriametrics/templates/victoriametrics.service.j2
+[Unit]
+Description=VictoriaMetrics
+After=network.target
+
+[Service]
+Type=simple
+User={{ victoriametrics_user }}
+Group={{ victoriametrics_user }}
+ExecStart={{ victoriametrics_install_dir }}/victoria-metrics-prod -storageDataPath={{ victoriametrics_data_dir }} -selfScrapeInterval=10s -promscrape.config={{ victoriametrics_install_dir }}scrape_config.yml -httpListenAddr={{ victoriametrics_listen_address }} -retentionPeriod=90d 
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

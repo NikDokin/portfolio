@@ -1,0 +1,41 @@
+# roles/certbot/tasks/main.yml
+---
+- name: Установка Certbot и плагина для Nginx
+  ansible.builtin.apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+    update_cache: true
+  tags: certbot_install
+
+- name: Копирование конфигураций Nginx
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/nginx/sites-available/{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+  loop: "{{ certbot_nginx_configs }}"
+  notify: Reload Nginx
+  tags: nginx_config
+
+- name: Создание символических ссылок для Nginx
+  ansible.builtin.file:
+    path: "/etc/nginx/sites-enabled/{{ item }}"
+    src: "/etc/nginx/sites-available/{{ item }}"
+    state: link
+  loop: "{{ certbot_nginx_configs }}"
+  notify: Reload Nginx
+  tags: nginx_links
+
+- name: Генерация SSL-сертификата
+  ansible.builtin.command: >
+    certbot --nginx --non-interactive --agree-tos --email {{ email }}
+    -d {{ domain }}
+    {% for service in certbot_nginx_configs %}
+    -d {{ service }}.{{ domain }}
+    {% endfor %}
+  register: certbot_result
+  changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
+  tags: ssl_generate

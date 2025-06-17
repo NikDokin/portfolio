@@ -1,0 +1,24 @@
+# roles/victoriametrics/tasks/service.yml
+---
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  tags: service
+
+- name: Launching and enabling the service VictoriaMetrics
+  ansible.builtin.systemd:
+    name: victoriametrics
+    state: started
+    enabled: true
+  tags: service
+
+- name: Checking the service status VictoriaMetrics
+  ansible.builtin.command: systemctl status victoriametrics
+  register: service_status
+  changed_when: false
+  tags: service
+
+- name: Service status output
+  ansible.builtin.debug:
+    var: service_status.stdout_lines
+  tags: service

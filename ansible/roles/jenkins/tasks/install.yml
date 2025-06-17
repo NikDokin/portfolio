@@ -1,0 +1,24 @@
+# roles/jenkins/tasks/install.yml
+---
+- name: Add Jenkins repository GPG key
+  ansible.builtin.apt_key:
+    url: "{{ jenkins_repo_key_url }}"
+    state: present
+  register: gpg_key_result
+  tags: repo
+
+- name: Add Jenkins repository
+  ansible.builtin.apt_repository:
+    repo: "{{ jenkins_repo_url }}"
+    filename: jenkins
+    state: present
+    update_cache: true
+    validate_certs: false
+  register: jenkins_repo_result
+  tags: repo
+
+- name: Install Jenkins
+  ansible.builtin.apt:
+    name: jenkins
+    state: present
+  tags: install
